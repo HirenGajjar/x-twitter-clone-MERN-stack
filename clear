@@ -1,0 +1,41 @@
+[33mcommit 8dfeb4c168276c483086f8ed9bd559707cc561af[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: HirenGajjar <gajjarhiren111@gmail.com>
+Date:   Thu Jun 20 20:44:49 2024 -0700
+
+    Add database connection
+
+[33mcommit 166ab229e99923ac4028ccb3ff3eb5b4150b546d[m
+Author: HirenGajjar <gajjarhiren111@gmail.com>
+Date:   Thu Jun 20 19:31:18 2024 -0700
+
+    Add auth controllers
+
+[33mcommit dfc0dd050a6e719cad5fb2ec98da0309273b9e4d[m
+Author: HirenGajjar <gajjarhiren111@gmail.com>
+Date:   Thu Jun 20 19:10:55 2024 -0700
+
+    Add auth routes
+
+[33mcommit 3adf1978d450580bf18c1d09217988debf8e0f51[m
+Author: HirenGajjar <gajjarhiren111@gmail.com>
+Date:   Thu Jun 20 18:50:33 2024 -0700
+
+    Add basic backend
+
+[33mcommit 7c590733da681868151f5987aed08ed5850b343c[m
+Author: HirenGajjar <gajjarhiren111@gmail.com>
+Date:   Thu Jun 20 18:46:14 2024 -0700
+
+    Install backend dependencies
+
+[33mcommit 070ee41cf1e9a24694635e93bd7ee4de827d5ce8[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: HirenGajjar <gajjarhiren111@gmail.com>
+Date:   Thu Jun 20 18:39:59 2024 -0700
+
+    Add frontend boilerplate code
+
+[33mcommit 6ae634cdb8d6aaa03499bffc2aefd8c7cf712b6a[m
+Author: Hiren Gajjar <40492198+HirenGajjar@users.noreply.github.com>
+Date:   Thu Jun 20 18:34:44 2024 -0700
+
+    Initial commit
