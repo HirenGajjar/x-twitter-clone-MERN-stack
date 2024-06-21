@@ -1,5 +1,11 @@
 import express from "express";
+import dotenv from "dotenv";
+import connectDB from "./DB/connect.db.js";
+dotenv.config();
 import authRoutes from "./Routes/auth.route.js";
 const app = express();
+
+// Routes
 app.use("/api/auth", authRoutes);
-app.listen(3000);
+// DB Connection
+app.listen(process.env.PORT, connectDB());
