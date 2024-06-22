@@ -6,7 +6,9 @@ import authRoutes from "./Routes/auth.route.js";
 const app = express();
 //Middlewares
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 // Routes
-app.use("/api/auth", authRoutes);
+
+app.use("/api/auth/", authRoutes);
 // DB Connection
 app.listen(process.env.PORT, connectDB());

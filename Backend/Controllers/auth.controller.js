@@ -1,7 +1,8 @@
 import UserModel from "../DB/Models/user.model.js";
 import bcrypt from "bcryptjs";
+import { generateTokenAndSetCookie } from "../Lib/Utils/generateToken.js";
 // Signup controller
-const signinController = async (req, res) => {
+const signupController = async (req, res) => {
   try {
     // Get all the values
     const { fullname, username, email, password } = req.body;
@@ -21,6 +22,12 @@ const signinController = async (req, res) => {
     if (existingEmail) {
       return res.status(400).json({ error: "Email already exist!" });
     }
+    //Check password length
+    if (password.length < 6) {
+      res
+        .status(400)
+        .json({ error: "Password must be at least 6 character long!" });
+    }
     // Hash password
     // Salt
     const salt = await bcrypt.genSalt(10);
@@ -36,6 +43,7 @@ const signinController = async (req, res) => {
     });
     // once new user is signed up generate jsonwebtoken
     if (newUser) {
+      // This function creates the token
       generateTokenAndSetCookie(newUser._id, res);
       // Save new user to DB
       await newUser.save();
@@ -55,7 +63,7 @@ const signinController = async (req, res) => {
     res.status(500).json({ message: "Internal server error!" });
   }
 };
-const signupController = async (req, res) => {
+const signinController = async (req, res) => {
   try {
   } catch (error) {}
 };
