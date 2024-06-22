@@ -63,13 +63,53 @@ const signupController = async (req, res) => {
     res.status(500).json({ message: "Internal server error!" });
   }
 };
-const signinController = async (req, res) => {
-  try {
-  } catch (error) {}
-};
+// Sing in controller
 const loginController = async (req, res) => {
   try {
-  } catch (error) {}
+    //get username password
+    const { username, password } = req.body;
+
+    // Check if user exist or not
+    const user = await UserModel.findOne({ username });
+
+    // Check correct password with hashing
+    // Here we compare the user entered password to the password being stored in database which is hashed and compare method does it for use
+    /* We have to compare the password with existed password in database or with an empty string as if user entered an undefined password then we cannot compare to password so we compare it to "" an empty string */
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      user?.password || ""
+    );
+
+    // If password or username is wrong
+    if (!user || !isPasswordCorrect) {
+      return res.status(400).json({ message: "Invalid username or password!" });
+    }
+    // if valid username and password then generate token
+    generateTokenAndSetCookie(user._id, res);
+    //send response
+    res.status(200).send({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      followers: user.followers,
+      following: user.following,
+      profileImage: user.profileImage,
+      coverImage: user.coverImage,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error!" });
+  }
+};
+const logoutController = async (req, res) => {
+  try {
+    // Make cookie age to 0
+    res.cookie("jwt", { maxAge: 0 });
+    res.status(200).json({ message: "Logout!" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error!" });
+  }
 };
 
-export { signinController, signupController, loginController };
+export { loginController, signupController, logoutController };
