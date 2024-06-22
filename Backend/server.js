@@ -16,7 +16,7 @@ app.use(cookieParser());
 //Auth routes
 app.use("/api/auth/", authRoutes);
 // users routes
-app.use("api/users/", userRoutes);
+app.use("/api/users/", userRoutes);
 
 // DB Connection
 app.listen(process.env.PORT, connectDB());
