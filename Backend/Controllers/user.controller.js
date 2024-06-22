@@ -1,5 +1,5 @@
 import UserModel from "../DB/Models/user.model.js";
-
+import NotificationModel from "../DB/Models/notification.model.js";
 const getUserProfileController = async (req, res) => {
   // If the user is authorized by protected route middleware then here user can get the profile
   // Get username from params
@@ -68,6 +68,15 @@ const followUnfollowUserController = async (req, res) => {
       await UserModel.findByIdAndUpdate(req.user._id, {
         $push: { following: id },
       });
+      // We created a model for notification, which has from, to, type and read properties
+      // First in case of following type is follow and to and from as appropriate
+      const newNotification = new NotificationModel({
+        type: "follow",
+        to: req.user._id,
+        from: modifyUser._id,
+      });
+      // Save to the database
+      await newNotification.save();
       res.status(200).json({ message: "Following!" });
     }
   } catch (error) {}
