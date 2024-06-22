@@ -114,10 +114,13 @@ const logoutController = async (req, res) => {
 
 const getMe = async (req, res) => {
   try {
-    // If the protected Route middleware has worked and user is authorized then this route give the user information except password 
-    const user = await UserModel.findById(req.user, _id).select("-password");
+    // If the protected Route middleware has worked and user is authorized then this route give the user information except password
+
+    const user = await UserModel.findById(req.user._id).select("-password");
+
     res.status(200).json(user);
   } catch (error) {
+    console.log("inside the controller");
     res.status(500).json({ message: "Internal server error!" });
   }
 };
