@@ -27,11 +27,11 @@ const followUnfollowUserController = async (req, res) => {
     // THe user we want to follow or un-follow
     const modifyUser = await UserModel.findById(id);
 
-    // The current logged in user and req.user._id comes from the protectedRoute middleware
+    // The current logged in user and req.user._id comes from the protectedRoute middleware as an object
     const currentUser = await UserModel.findById(req.user._id);
 
     // here we don't want user to follow or un-follow them selves
-    // here we convert the id to string first to make comparison
+    // here we convert the id to string from an object first to make comparison
     if (id === req.user._id.toString()) {
       return res
         .status(400)
@@ -44,7 +44,7 @@ const followUnfollowUserController = async (req, res) => {
     // If everything is good so far then user can follow or un-follow
     // Here the current user has a following as an array in database and array have a includes method, if user already exist in following array then user can un-follow
     const isFollowing = currentUser.following.includes(id);
-    if (!isFollowing) {
+    if (isFollowing) {
       // un-follow user
       // When person A un-follows person B , we need to remove the id of person B from A's following array
       // At the same time in user B, the following array will be updated and person A's followers array will be changed
@@ -63,12 +63,12 @@ const followUnfollowUserController = async (req, res) => {
       // A good explanation at 1:18:00
       // And we send notification to both of the users
       await UserModel.findByIdAndUpdate(id, {
-        $push: { $followers: req.user._id },
+        $push: { followers: req.user._id },
       });
       await UserModel.findByIdAndUpdate(req.user._id, {
-        $push: { $following: id },
+        $push: { following: id },
       });
-      res.status(200).json({ message: "User followed!" });
+      res.status(200).json({ message: "Following!" });
     }
   } catch (error) {}
 };
