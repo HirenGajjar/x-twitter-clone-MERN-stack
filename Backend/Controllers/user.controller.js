@@ -1,5 +1,6 @@
 import UserModel from "../DB/Models/user.model.js";
 import NotificationModel from "../DB/Models/notification.model.js";
+import bcrypt from "bcryptjs";
 const getUserProfileController = async (req, res) => {
   // If the user is authorized by protected route middleware then here user can get the profile
   // Get username from params
@@ -121,8 +122,54 @@ const getSuggestedUserController = async (req, res) => {
     /*Even though we get the 10 size from the backend, it will still have all the users that current user follows too, so we first filter that out and then slice it down to 4 to show on the screen*/
   } catch (error) {}
 };
+
+// To update the profile user need to send few values like email, fullname,bio,link  or username and to update password user needs to send current password, and new password
 const updateUserProfileController = async (req, res) => {
   try {
+    const {
+      password,
+      email,
+      username,
+      bio,
+      link,
+      fullname,
+      currentPassword,
+      newPassword,
+    } = req.body;
+    let { profileImage, coverImage } = req.body;
+    const userId = req.user._id;
+    // now check if this user exist or not
+    const user = await UserModel.findById(userId);
+    // If no user found
+    if (!user) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+    // If user found and user want to update the password
+    /*To update the password user needs to enter the current password as well as new password*/
+    // If user try to enter empty fields for both password, we can use XOR operator
+    /*if((!newPassword && currentPassword) || (!currentPassword && newPassword))*/
+    if (newPassword ^ currentPassword) {
+      return res.status(404).json({ message: "Both password are required!" });
+    }
+    // If both password fields are given
+
+    if (currentPassword && newPassword) {
+      // As we save password with bcrypt , we need to compare the current entered password with bcrypted saved password
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      // If invalid current  password
+      if (!isMatch) {
+        return res.status(400).json({ message: "Incorrect current password!" });
+      }
+      // Check new password ,length > 6
+      if (newPassword.length < 6) {
+        return res
+          .status(400)
+          .json({ message: "Password must have at least 6 characters!" });
+      }
+      // If both of the passwords, current and new password are valid then hash the new password and update to DB
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(newPassword, salt);
+    }
   } catch (error) {}
 };
 
