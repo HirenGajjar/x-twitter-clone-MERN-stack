@@ -81,10 +81,54 @@ const followUnfollowUserController = async (req, res) => {
     }
   } catch (error) {}
 };
-const updateUserProfileController = async (req, res) => {};
+/*
+The suggested user are the users that will be shown on side bars, so the current user should not see it self in side bar / as suggestion 
+and the users which are already in following list of current user should not be present in side bar as a suggestions
+*/
+const getSuggestedUserController = async (req, res) => {
+  try {
+    // Get user id
+    const userId = req.user._id;
+
+    // get the following array of user
+    const userFollowedByMe = await UserModel.findById(userId).select(
+      "following"
+    );
+    // Aggregate function
+    const users = await UserModel.aggregate([
+      {
+        $match: {
+          _id: { $ne: userId },
+        },
+      },
+      { $sample: { size: 10 } },
+    ]);
+
+    // Out of all the user list from current logged in user, filter out those who are already being present in following list
+    const filteredUsers = users.filter(
+      (user) => !userFollowedByMe.following.includes(user._id)
+    );
+
+    // slice the filtered users to only 5 at the time
+    const suggestedUsers = filteredUsers.slice(0, 4);
+
+    // Set the password to null for the suggested users
+    suggestedUsers.forEach((user) => {
+      user.password = null;
+    });
+    // send the final list of suggested users
+    res.status(200).send(suggestedUsers);
+    /*Even though we get the 10 size from the backend, it will still have all the users that current user follows too, so we first filter that out and then slice it down to 4 to show on the screen*/
+  } catch (error) {}
+};
+const updateUserProfileController = async (req, res) => {
+  try {
+  } catch (error) {}
+};
 
 export {
   getUserProfileController,
   followUnfollowUserController,
   updateUserProfileController,
+  getSuggestedUserController,
 };

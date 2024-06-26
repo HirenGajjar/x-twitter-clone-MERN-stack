@@ -5,9 +5,12 @@ import { generateTokenAndSetCookie } from "../Lib/Utils/generateToken.js";
 const signupController = async (req, res) => {
   try {
     // Get all the values
+
     const { fullname, username, email, password } = req.body;
+
     // Regex for email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     //Email validation
     if (!emailRegex.test(email)) {
       return res.status(400).json({ error: "Invalid email!" });
