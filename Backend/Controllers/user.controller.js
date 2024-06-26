@@ -1,6 +1,7 @@
 import UserModel from "../DB/Models/user.model.js";
 import NotificationModel from "../DB/Models/notification.model.js";
 import bcrypt from "bcryptjs";
+import { v2 } from "cloudinary";
 const getUserProfileController = async (req, res) => {
   // If the user is authorized by protected route middleware then here user can get the profile
   // Get username from params
@@ -80,7 +81,9 @@ const followUnfollowUserController = async (req, res) => {
       await newNotification.save();
       res.status(200).json({ message: "Following!" });
     }
-  } catch (error) {}
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error!" });
+  }
 };
 /*
 The suggested user are the users that will be shown on side bars, so the current user should not see it self in side bar / as suggestion 
@@ -120,14 +123,15 @@ const getSuggestedUserController = async (req, res) => {
     // send the final list of suggested users
     res.status(200).send(suggestedUsers);
     /*Even though we get the 10 size from the backend, it will still have all the users that current user follows too, so we first filter that out and then slice it down to 4 to show on the screen*/
-  } catch (error) {}
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error!" });
+  }
 };
 
 // To update the profile user need to send few values like email, fullname,bio,link  or username and to update password user needs to send current password, and new password
 const updateUserProfileController = async (req, res) => {
   try {
     const {
-      password,
       email,
       username,
       bio,
@@ -135,9 +139,17 @@ const updateUserProfileController = async (req, res) => {
       fullname,
       currentPassword,
       newPassword,
+      password,
     } = req.body;
     let { profileImage, coverImage } = req.body;
-    const userId = req.user._id;
+    let userId = req.user._id;
+
+    // Check if plain password is included in the request
+    if (password) {
+      return res
+        .status(400)
+        .json({ message: "Password should not be sent directly! " });
+    }
     // now check if this user exist or not
     const user = await UserModel.findById(userId);
     // If no user found
@@ -148,8 +160,11 @@ const updateUserProfileController = async (req, res) => {
     /*To update the password user needs to enter the current password as well as new password*/
     // If user try to enter empty fields for both password, we can use XOR operator
     /*if((!newPassword && currentPassword) || (!currentPassword && newPassword))*/
-    if (newPassword ^ currentPassword) {
-      return res.status(404).json({ message: "Both password are required!" });
+    if (
+      (currentPassword && !newPassword) ||
+      (!currentPassword && newPassword)
+    ) {
+      return res.status(400).json({ message: "Both passwords are required!" });
     }
     // If both password fields are given
 
@@ -173,11 +188,42 @@ const updateUserProfileController = async (req, res) => {
 
     // Update profile image
     if (profileImage) {
-      
+      // To update the profile image we need to delete the old one otherwise cloudinary object will be run out of the storage soon
+      if (user.profileImage) {
+        /*every image being stored in cloudinary will have an image id which we will use to delete the old image and upload new one*/
+        await v2.uploader.destroy(
+          user.profileImage.split("/").pop().split(".")[0]
+        );
+      }
+      // First upload the new image
+      const newProfileImage = await v2.uploader.upload(profileImage);
+      // We get the secure url from cloudinary, replace current image to new url
+      profileImage = newProfileImage.secure_url;
     }
     if (coverImage) {
+      await v2.uploader.destroy(user.coverImage.split("/").pop().split(".")[0]);
+      const newCoverImage = await v2.uploader.upload(coverImage);
+      coverImage = newCoverImage.secure_url;
     }
-  } catch (error) {}
+    // Here we just have added the images to cloudinary and not to our DB, now we will save the image changes to DB
+    /*T update the images we gonna use the username , if user gives new username then update it first otherwise use same one , same with email ,and all other fields*/
+    user.fullname = fullname || user.fullname;
+    user.email = email || user.email;
+    user.bio = bio || user.bio;
+    user.username = username || user.username;
+    user.link = link || user.link;
+    user.profileImage = profileImage || user.profileImage;
+    user.coverImage = coverImage || user.coverImage;
+    // save changes to DB
+    await user.save();
+    /* Because we need to give response to the user as they changes the values, we will make password null and send to user, here we are not storing null password in DB , we are just sending it to user, that is why we save the changes first and then make password null to send only user */
+
+    user.password = null;
+    // Send updated data to user
+    return res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error!" });
+  }
 };
 
 export {
