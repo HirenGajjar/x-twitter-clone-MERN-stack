@@ -11,9 +11,9 @@ import { protectedRoute } from "../Middleware/protectedRoute.js";
 // To create post
 router.post("/create", protectedRoute, createPostController);
 // Delete post
-router.delete("/", protectedRoute, deletePostController);
+// router.delete("/", protectedRoute, deletePostController);
 // Like post
-router.post("/like/:id", protectedRoute, likeUnlikePostController);
+// router.post("/like/:id", protectedRoute, likeUnlikePostController);
 // comment post
-router.post("/comment/:id", protectedRoute, commentPostController);
-export default postRoutes;
+// router.post("/comment/:id", protectedRoute, commentPostController);
+export default router;
