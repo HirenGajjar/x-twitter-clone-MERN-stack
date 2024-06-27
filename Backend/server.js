@@ -4,6 +4,7 @@ import connectDB from "./DB/connect.db.js";
 dotenv.config();
 import authRoutes from "./Routes/auth.route.js";
 import userRoutes from "./Routes/user.route.js";
+import postRoutes from "./Routes/post.route.js";
 import cookieParser from "cookie-parser";
 import { v2 } from "cloudinary";
 const app = express();
@@ -24,6 +25,8 @@ app.use(cookieParser());
 app.use("/api/auth/", authRoutes);
 // users routes
 app.use("/api/users/", userRoutes);
+// post routes
+app.use("/api/posts/", postRoutes);
 
 // DB Connection
 app.listen(process.env.PORT, connectDB());
