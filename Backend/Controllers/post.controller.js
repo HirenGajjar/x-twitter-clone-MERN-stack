@@ -72,6 +72,28 @@ const likeUnlikePostController = async (req, res) => {
 };
 const commentPostController = async (req, res) => {
   try {
+    // get text from body
+    const { text } = req.body;
+    // Get the post id
+    const postId = req.params.id;
+    // Get the user id
+    const user = req.user._id;
+    // Check if text is empty or not
+    if (!text) {
+      return res.status(400).json({ message: "Empty text field!" });
+    }
+    // Check if post is in DB or not
+    const post = await PostModel.findById(postId);
+    if (!post) {
+      return res.status(400).json({ message: "Invalid action!" });
+    }
+    // Create comment
+    const comment = { user: user._id, text };
+    // ADd comment to array
+    post.comments.push(comment);
+    // Save comment to DB
+    await post.save();
+    res.status(200).json({ message: "Commented!" });
   } catch (error) {
     return res.status(500).json({ message: "Internal Server Error!" });
   }

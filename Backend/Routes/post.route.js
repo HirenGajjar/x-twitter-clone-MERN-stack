@@ -15,5 +15,5 @@ router.delete("/:id", protectedRoute, deletePostController);
 // Like post
 // router.post("/like/:id", protectedRoute, likeUnlikePostController);
 // comment post
-// router.post("/comment/:id", protectedRoute, commentPostController);
+router.post("/comment/:id", protectedRoute, commentPostController);
 export default router;
