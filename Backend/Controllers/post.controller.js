@@ -5,6 +5,7 @@ const createPostController = async (req, res) => {
   try {
     // Get the text for post
     const { text } = req.body;
+
     // Get the image if provided
     let { img } = req.body;
     // Get the user Id
@@ -37,6 +38,28 @@ const createPostController = async (req, res) => {
 };
 const deletePostController = async (req, res) => {
   try {
+    // We get the id of the post from params which we first look at the DB if it exist or not
+    const post = await PostModel.findById(req.params.id);
+
+    // If post does not exist
+    if (!post) {
+      return res.status(400).json({ message: "Invalid post!" });
+    }
+    // Check if the logged in user is not the owner of post
+    if (post.user.toString() !== req.user._id.toString()) {
+      // User is not authorized to delete the post
+      return res.status(400).json({ message: "Unable to delete!" });
+    }
+    // If user is authorized and if post has an image, then delete the image from cloudinary
+    if (post.img) {
+      // Get the image id
+      const imgId = post.img.split("/").pop().split(".")[0];
+      // Delete the image
+      await v2.uploader.destroy(imgId);
+    }
+    // Then find the post id and delete from Database
+    await PostModel.findByIdAndDelete(req.params.id);
+    res.status(202).json({ message: "Post deleted!" });
   } catch (error) {
     return res.status(500).json({ message: "Internal Server Error!" });
   }
