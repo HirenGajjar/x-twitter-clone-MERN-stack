@@ -66,6 +66,30 @@ const deletePostController = async (req, res) => {
 };
 const likeUnlikePostController = async (req, res) => {
   try {
+    // get user id
+    const userId = req.user._id;
+    // get post id
+    const { postId } = req.params;
+    // check if post exist or not
+    const post = await PostModel.findById(postId);
+    // If no post exist
+    if (!post) {
+      return res.status(400).json({ message: "Invalid operation!" });
+    }
+    // If post exist
+    // Then check if user already had liked it or not
+    const userLikedPost = post.likes.includes(userId);
+    // If yes then unlike the post
+    if (userLikedPost) {
+      // unlike the post
+      await PostModel.updateOne({ _id: postId }, { $pull: { $likes: userId } });
+      res.status(200).json({ message: "Uniked post!" });
+    }
+    // if not then like the post
+    else {
+      post.likes.push(userId);
+      await post.save();
+    }
   } catch (error) {
     return res.status(500).json({ message: "Internal Server Error!" });
   }
