@@ -5,9 +5,11 @@ import {
   deletePostController,
   likeUnlikePostController,
   commentPostController,
+  getAllPostsController,
 } from "../Controllers/post.controller.js";
 import { protectedRoute } from "../Middleware/protectedRoute.js";
-
+//To get all the posts
+router.get("/all", protectedRoute, getAllPostsController);
 // To create post
 router.post("/create", protectedRoute, createPostController);
 // Delete post

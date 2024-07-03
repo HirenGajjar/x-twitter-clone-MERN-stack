@@ -1,5 +1,6 @@
 import PostModel from "../DB/Models/post.model.js";
 import UserModel from "../DB/Models/user.model.js";
+import NotificationModel from "../DB/Models/notification.model.js";
 import { v2 } from "cloudinary";
 const createPostController = async (req, res) => {
   try {
@@ -68,10 +69,13 @@ const likeUnlikePostController = async (req, res) => {
   try {
     // get user id
     const userId = req.user._id;
-    // get post id
-    const { postId } = req.params;
+
+    // get post id, here we are getting id as a request param and we are renaming it to postId
+    const { id: postId } = req.params;
+
     // check if post exist or not
     const post = await PostModel.findById(postId);
+
     // If no post exist
     if (!post) {
       return res.status(400).json({ message: "Invalid operation!" });
@@ -83,12 +87,25 @@ const likeUnlikePostController = async (req, res) => {
     if (userLikedPost) {
       // unlike the post
       await PostModel.updateOne({ _id: postId }, { $pull: { $likes: userId } });
+
       res.status(200).json({ message: "Uniked post!" });
     }
     // if not then like the post
     else {
+      // Add like in DB
       post.likes.push(userId);
+      // Save changes
       await post.save();
+      // Make notification
+      // from, to and type
+      const notification = new NotificationModel({
+        from: userId,
+        to: post.user,
+        type: "like",
+      });
+      // Save notification
+      await notification.save();
+      res.status(200).json({ message: "Post liked!" });
     }
   } catch (error) {
     return res.status(500).json({ message: "Internal Server Error!" });
@@ -122,9 +139,17 @@ const commentPostController = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error!" });
   }
 };
+// Get all posts controller
+const getAllPostsController = async (req, res) => {
+  try {
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error!" });
+  }
+};
 export {
   createPostController,
   deletePostController,
   likeUnlikePostController,
   commentPostController,
+  getAllPostsController,
 };
